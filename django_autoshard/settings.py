@@ -10,7 +10,8 @@ class DjangoAutoshardSettings:
             user_settings = {}
 
         self.__settings = dict(
-            SHARDS=10
+            MAX_SHARDS=2**13,
+            SHARDED_MODEL=settings.AUTH_USER_MODEL
         )
         self.__settings.update(user_settings)
 
