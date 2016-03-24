@@ -41,7 +41,7 @@ class Sharding:
         # for connection in connections.all():
         #    print(connection.alias)
 
-    def set_logical_shards(self, node, config):
+    def set_logical_shards(self, node: str, config: dict)->None:
         for i in config['RANGE']:
             shard = config
             shard['NAME'] = '{}_{}'.format(config['NAME'], i)
@@ -64,5 +64,5 @@ class Sharding:
 
     @staticmethod
     def get_shard_index(key):
-        hash = md5(key.encode()).hexdigest()
-        return int(hash, 16) % settings.MAX_SHARDS
+        _hash = md5(key.encode()).hexdigest()
+        return int(_hash, 16) % settings.MAX_SHARDS
