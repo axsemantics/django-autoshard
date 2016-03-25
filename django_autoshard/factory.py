@@ -18,7 +18,7 @@ class ShardingFactory:
             self.set_logical_shards(node, config)
 
         self.SHARDS = OrderedDict(sorted(self.SHARDS.items()))
-        settings.SHARDS = self.SHARDS
+        django_settings.SHARDS = self.SHARDS
 
     def set_logical_shards(self, node: str, config: dict)->None:
         for i in config['RANGE']:

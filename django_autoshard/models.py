@@ -4,11 +4,11 @@ from django.db import models, transaction
 from django_autoshard import utils
 
 
-class ShardedUserModel(AbstractUser):
+class User(AbstractUser):
     uuid = models.BigIntegerField(null=True)
 
     def __init__(self, *args, **kwargs):
-        kwargs['__shard'] = utils.get_shard(kwargs['email'])
+        self.__shard = utils.get_shard(kwargs['email'])
         super().__init__(*args, **kwargs)
 
     @property
@@ -22,4 +22,4 @@ class ShardedUserModel(AbstractUser):
         with transaction.atomic(using=self.shard.alias):
             super().save(*args, **kwargs)  # Set the auto-id
             uuid = utils.generate_uuid(self.pk, self.shard.index)
-            return super().save(using=kwargs['using'], uuid=uuid)
+            return super().save(using=self.shard.alias, uuid=uuid)

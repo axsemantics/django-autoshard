@@ -1,7 +1,9 @@
+import bisect
 import datetime
 import time
 import hashlib
 
+from django.conf import settings as django_settings
 from django.core.exceptions import ImproperlyConfigured
 from . import settings
 from .shard import Shard
@@ -13,7 +15,16 @@ def get_shard_index(key: str) -> int:
 
 
 def get_shard(key: str) -> Shard:
-    return settings.SHARDS[get_shard_index(key)]
+    index = get_shard_index(key)
+    try:
+        return django_settings.SHARDS[index]
+    except KeyError:
+        shard_indexes = list(django_settings.SHARDS.keys())
+        pos = bisect.bisect(shard_indexes, index)
+        if pos >= len(shard_indexes):
+            pos = 0
+        index = shard_indexes[pos:pos + 1][0]
+        return django_settings.SHARDS[index]
 
 
 def generate_uuid(local_id: int, shard_index: int)->int:
