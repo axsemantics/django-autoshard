@@ -1,4 +1,3 @@
 [run]
 source = django_autoshard
-omit = */migrations/*
-omit = */management/*
+omit = */migrations/* */tests/* */management/*
