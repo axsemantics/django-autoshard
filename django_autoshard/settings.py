@@ -12,7 +12,6 @@ class DjangoAutoshardSettings:
         self.__settings = dict(
             EPOCH='2016-01-01',
             MAX_SHARDS=1 << 13,
-            STRATEGY='django_autoshard.strategy.user_by_email.UserByEmailStrategy'
         )
         self.__settings.update(user_settings)
 

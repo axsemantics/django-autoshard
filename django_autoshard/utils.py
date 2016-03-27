@@ -1,21 +1,28 @@
 import bisect
-import datetime
 import time
 import hashlib
 
 from django.conf import settings as django_settings
 from django.core.exceptions import ImproperlyConfigured
 from . import settings
-from .shard import Shard
+from django.utils import timezone
 
 
-def get_shard_index(key: str) -> int:
+def get_shard_index(key):
     _hash = hashlib.md5(key.encode()).hexdigest()
     return int(_hash, 16) % settings.MAX_SHARDS
 
 
-def get_shard(key: str) -> Shard:
+def get_shard_index_from_uuid(uuid):
+    return (uuid >> 10) & 0x1FFF
+
+
+def get_shard(key):
     index = get_shard_index(key)
+    return get_shard_from_index(index)
+
+
+def get_shard_from_index(index):
     try:
         return django_settings.SHARDS[index]
     except KeyError:
@@ -27,9 +34,10 @@ def get_shard(key: str) -> Shard:
         return django_settings.SHARDS[index]
 
 
-def generate_uuid(local_id: int, shard_index: int)->int:
+def generate_uuid(local_id, shard_index):
     try:
-        epoch = datetime.datetime.strptime(settings.EPOCH, '%Y-%m-%d').timestamp() * 1000
+        epoch = timezone.datetime.strptime(settings.EPOCH, '%Y-%m-%d')
+        epoch = time.mktime(epoch.timetuple()) * 1000
     except ValueError:
         raise ImproperlyConfigured('EPOCH must be in Y-m-d format')
     now = time.time() * 1000
@@ -37,7 +45,3 @@ def generate_uuid(local_id: int, shard_index: int)->int:
     result |= shard_index << 10
     result |= local_id % 1024
     return result
-
-
-def get_shard_id(uuid):
-    return (uuid >> 10) & 0x1FFF

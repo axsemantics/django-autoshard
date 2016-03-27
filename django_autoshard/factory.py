@@ -1,34 +1,38 @@
 from collections import OrderedDict
 
 from django.conf import settings as django_settings
-from django_autoshard import settings
 from .shard import Shard
 from . import utils
 
 
 class ShardingFactory:
-    SHARDS = OrderedDict()
 
     def configure(self):
-        for node, config in settings.SHARDS.items():
+        shards = dict()
+        nodes = django_settings.DATABASES.copy()
+        for node, db in nodes.items():
             try:
-                _ = config['NAME']
+                _ = db['NAME']
             except KeyError:
                 raise RuntimeError('Node {} does not have a database name.'.format(node))
-            self.set_logical_shards(node, config)
+            node_shards = self.set_logical_shards(node, db)
+            shards.update(node_shards)
 
-        self.SHARDS = OrderedDict(sorted(self.SHARDS.items()))
-        django_settings.SHARDS = self.SHARDS
+        django_settings.SHARDS = OrderedDict(sorted(shards.items()))
+        django_settings.DATABASE_ROUTERS = ('django_autoshard.routers.ShardRouter', )
 
-    def set_logical_shards(self, node: str, config: dict)->None:
+    def set_logical_shards(self, node, config):
+        result = dict()
         for i in config['RANGE']:
-            shard = config
+            shard = config.copy()
+            del shard['RANGE']
             shard['NAME'] = '{}_{}'.format(config['NAME'], i)
-            node_name = '{}{}'.format(node, i)
-            django_settings.DATABASES[node_name] = shard
-            node_index = utils.get_shard_index(node_name)
+            alias = '{}_{}'.format(node, i)
+            django_settings.DATABASES[alias] = shard
+            node_index = utils.get_shard_index(alias)
             replicas = self.set_replicas(config)
-            self.SHARDS[node_index] = Shard(node_index, node_name, replicas)
+            result[node_index] = Shard(node_index, alias, replicas)
+        return result
 
     def set_replicas(self, config):
         return {}

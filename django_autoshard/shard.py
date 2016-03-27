@@ -19,5 +19,13 @@ class Shard:
     def connection(self):
         return connections[self.alias]
 
+    @property
+    def database(self):
+        return self.connection.settings_dict['NAME']
+
+    @property
+    def host(self):
+        return self.connection.settings_dict['HOST']
+
     def __str__(self):
         return self.alias
