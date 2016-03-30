@@ -6,7 +6,7 @@ from django_autoshard.managers import ShardedManager
 
 
 class ShardedModel(models.Model):
-    uuid = models.BigIntegerField(null=True)
+    id = models.BigIntegerField(primary_key=True)
 
     objects = ShardedManager()
 
@@ -29,13 +29,20 @@ class ShardedModel(models.Model):
 
     def save(self, *args, **kwargs):
         kwargs['using'] = self.shard.alias
-        if self.uuid is not None:
+        if self.pk is not None:
             return super(ShardedModel, self).save(*args, **kwargs)  # UPDATE
+        self.id = utils.generate_uuid(self.shard.index)
+        return super(ShardedModel, self).save(*args, **kwargs)  # Set the auto-id
 
-        with transaction.atomic():
-            super(ShardedModel, self).save(*args, **kwargs)  # Set the auto-id
-            self.uuid = utils.generate_uuid(self.pk, self.shard.index)
-            return super(ShardedModel, self).save()
+
+class ShardRelatedModel(models.Model):
+    class Meta:
+        abstract = True
+
+    @property
+    def shard(self):
+        for field in self._meta.fields:
+            pass
 
 
 class User(ShardedModel, AbstractUser):

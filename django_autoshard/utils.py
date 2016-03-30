@@ -1,6 +1,7 @@
 import bisect
 import time
 import hashlib
+import random
 
 from django.conf import settings as django_settings
 from django.core.exceptions import ImproperlyConfigured
@@ -34,12 +35,13 @@ def get_shard_from_index(index):
         return django_settings.SHARDS[index]
 
 
-def generate_uuid(local_id, shard_index):
+def generate_uuid(shard_index):
     try:
         epoch = timezone.datetime.strptime(settings.EPOCH, '%Y-%m-%d')
         epoch = time.mktime(epoch.timetuple()) * 1000
     except ValueError:
         raise ImproperlyConfigured('EPOCH must be in Y-m-d format')
+    local_id = random.randint(0, 1204)
     now = time.time() * 1000
     result = int(now - epoch) << 23
     result |= shard_index << 10

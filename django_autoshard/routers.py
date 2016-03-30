@@ -1,12 +1,7 @@
-from django_autoshard.models import ShardedModel
+from django_autoshard.models import ShardedModel, ShardRelatedModel
 
 
 class ShardRouter:
     def db_for_write(self, model, **hints):
-        try:
-            instance = hints['instance']
-            if issubclass(model, ShardedModel) or isinstance(instance, ShardedModel):
-                return instance.shard.alias
-        except KeyError:
-            pass
-        return None
+        if not issubclass(model, ShardedModel) and not issubclass(model, ShardRelatedModel):
+            return 'default'
