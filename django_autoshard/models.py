@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models, transaction
 
 from django_autoshard import utils
-from django_autoshard.managers import ShardedManager
+from django_autoshard.managers import ShardedManager, UserManager
 
 
 class ShardedModel(models.Model):
@@ -47,3 +47,5 @@ class ShardRelatedModel(models.Model):
 
 class User(ShardedModel, AbstractUser):
     SHARD_KEY = 'email'
+
+    objects = UserManager()
