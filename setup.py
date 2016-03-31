@@ -46,6 +46,7 @@ setup(
     keywords='django shard sharding',
     install_requires=[
         'django>=1.8',
+        'six',
     ],
     test_suite='runtests',
 )

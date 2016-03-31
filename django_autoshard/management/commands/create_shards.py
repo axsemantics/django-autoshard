@@ -15,4 +15,4 @@ class Command(BaseCommand):
                     'Database [%s] created.' % shard.database
                 ))
             except ProgrammingError as e:
-                self.stderr.write(e)
+                self.stderr.write(str(e))
