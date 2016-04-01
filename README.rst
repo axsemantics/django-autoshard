@@ -19,3 +19,33 @@ A Django library that makes sharding easy, using the `Consistent Hashing <https:
 .. image:: https://coveralls.io/repos/github/cipriantarta/django-autoshard/badge.svg?branch=master
     :alt: Coverage Status
     :target: https://coveralls.io/github/cipriantarta/django-autoshard?branch=master
+
+
+Installation
+============
+
+
+Commands
+========
+
+
+Settings
+========
+
+
+Caveats
+=======
+
+
+TODO
+====
+
+- Create shard migration script
+- Create a benchmarking script
+- Add more tests
+- Test against Postgresql and Oracle
+
+
+Change Log
+==========
+- Release 1.0 is pending

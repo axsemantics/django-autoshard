@@ -1,7 +1,8 @@
 from django.apps import apps
+from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.db import connection
-from django.db.utils import OperationalError
+from django.db.utils import OperationalError, ProgrammingError
 from django_autoshard import models
 
 
@@ -20,8 +21,14 @@ class Command(BaseCommand):
                 self.run(cursor, model, **options)
 
     def run(self, cursor, model, **options):
-        constraints = {k: v for k, v in cursor.db.introspection.get_constraints(cursor, model._meta.db_table).items() if
-                       v['foreign_key'] is not None and v['foreign_key'][0] == models.User._meta.db_table}
+        try:
+            constraints = dict()
+            for key, val in cursor.db.introspection.get_constraints(cursor, model._meta.db_table).items():
+                if val['foreign_key'] is not None and val['foreign_key'][0] == get_user_model()._meta.db_table:
+                    constraints[key] = val
+        except ProgrammingError:
+            return
+
         if len(constraints) == 0:
             f = self.style.MIGRATE_HEADING('No constraints defined for {}.'.format(str(model)))
             self.stdout.write(f)
