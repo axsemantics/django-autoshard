@@ -48,5 +48,5 @@ setup(
         'django>=1.8',
         'six',
     ],
-    test_suite='runtests',
+    test_suite='django_autoshard.tests',
 )

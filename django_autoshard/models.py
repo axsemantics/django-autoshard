@@ -1,5 +1,5 @@
 from django.contrib.auth.models import AbstractUser
-from django.db import models, transaction
+from django.db import models
 
 from django_autoshard import utils
 from django_autoshard.managers import ShardedManager, UserManager
