@@ -68,7 +68,6 @@ Installation
     class Book(ShardRelatedModel):
         user = models.ForeignKey(User)
 
-
 3. Use this model as the default auth model in your :python:`settings.py` file.
     :python:`AUTH_USER_MODEL='<path.to.your.model>.User'`
 
@@ -103,10 +102,10 @@ Installation
 
 8. Run :python:`python manage.py drop_constraints`
 
-
 Commands
 ========
 Management Commands that come with this library:
+
     1. create_shards:
         - this command will create all the logical shards(new databases) on all of the configured databases(nodes) in :python:`settings.DATABASES`
 
@@ -115,7 +114,6 @@ Management Commands that come with this library:
 
     3. drop_constraints:
         - this command will drop all the foreign key constraints from the "default" database that have a relation with your "ShardedModel"
-
 
 Settings
 ========
@@ -149,7 +147,6 @@ TODO
 - Create a benchmarking script
 - Add more tests
 - Test against Postgresql and Oracle
-
 
 Change Log
 ==========
