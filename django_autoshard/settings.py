@@ -14,6 +14,7 @@ class DjangoAutoshardSettings:
             MAX_SHARDS=1 << 13,
         )
         self.__settings.update(user_settings)
+        settings.DJANGO_AUTOSHARD = self
 
     def __getattr__(self, name):
         return self.__settings.get(name)

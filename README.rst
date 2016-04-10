@@ -138,6 +138,8 @@ Caveats
 - models that come from third party apps that are related to your sharded model and you don't have any control over, will need to have their foreign key dropped(use :python:`drop_constraints` command).
 - instead of using :python:`Book.objects.create(...)` you will have to use :python:`book = Book(...)` and then :python:`book.save()`. This is because of how Django model managers work.
 - if your business model requires to do searches on shard related models, or other fields of the sharded model besides the configured :python:`SHARD_KEY`, for example text based search, you will need to use tools like Elasticsearch, where you will store your text info and the shard id of tha object that this text info belongs to, in a single Elasticsearch document.
+- :python:`ShardedModel` does not support :python:`count()` and :python:`all()`
+- :python:`django.contrib.admin` will not work with sharded models
 
 TODO
 ====
@@ -151,6 +153,11 @@ TODO
 
 Change Log
 ==========
+
+1.1 [2016-04-10]
+----------------
+- raise :python:`NotImplementedError` when trying to use :python:`count()` or :python:`all()` on a :python:`ShardedModel`
+- Update documentation
 
 1.0(alpha) [2016-04-02]
 -----------------------
