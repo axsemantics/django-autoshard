@@ -16,3 +16,4 @@ class Command(BaseCommand):
                 ))
             except ProgrammingError as e:
                 self.stderr.write(str(e))
+        self.stdout.write(self.style.MIGRATE_HEADING('Done.\n'))

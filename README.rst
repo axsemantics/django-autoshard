@@ -151,8 +151,9 @@ TODO
 Change Log
 ==========
 
-1.1 [2016-04-10]
+1.1 [2016-05-21]
 ----------------
+- fixes management commands for python2 and python3 < 3.5
 - raise :python:`NotImplementedError` when trying to use :python:`count()` or :python:`all()` on a :python:`ShardedModel`
 - Update documentation
 

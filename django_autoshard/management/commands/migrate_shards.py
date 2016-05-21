@@ -1,3 +1,4 @@
+from itertools import chain
 import time
 import six
 
@@ -29,11 +30,11 @@ class Command(DjangoMigrateCommand):
         if six.PY3:
             executor = ThreadPoolExecutor(max_workers=10)
             for _, shard in settings.SHARDS.items():
-                executor.submit(self.migrate, shard, *args, **options)
+                executor.submit(self.migrate, *chain((shard,), args), **options)
         else:
             queue = deque()
             for _, shard in settings.SHARDS.items():
-                queue.append(Thread(target=self.migrate, args=(shard, *args), kwargs=options))
+                queue.append(Thread(target=self.migrate, args=chain((shard,), args), kwargs=options))
             workers = 0
             while queue:
                 if workers < 10:
@@ -44,5 +45,6 @@ class Command(DjangoMigrateCommand):
         options['verbosity'] = 0
         try:
             self.run(*args, **options)
+            self.stdout.write(self.style.MIGRATE_HEADING('Done.\n'))
         except KeyboardInterrupt:
-            self.stdout.write(self.style.MIGRATE_HEADING('Migration interrupted.'))
+            self.stdout.write(self.style.MIGRATE_HEADING('Migration interrupted.\n'))
