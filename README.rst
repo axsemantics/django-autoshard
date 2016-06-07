@@ -1,8 +1,8 @@
 .. role:: python(code)
     :language: python
 
-Django Logging
-==============
+Django Autoshard
+================
 
 A `Django <https://www.djangoproject.com/>`_ library that makes sharding easy, using the `Consistent Hashing <https://en.wikipedia.org/wiki/Consistent_hashing>`_ algorithm.
 
