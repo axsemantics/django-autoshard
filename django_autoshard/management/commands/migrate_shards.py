@@ -2,12 +2,6 @@ from itertools import chain
 import time
 import six
 
-if six.PY3:
-    from concurrent.futures import ThreadPoolExecutor
-else:
-    from collections import deque
-    from threading import Thread
-
 from django.conf import settings
 from django.core.management.commands.migrate import Command as DjangoMigrateCommand
 from django.db import OperationalError
@@ -27,19 +21,8 @@ class Command(DjangoMigrateCommand):
                     self.style.MIGRATE_HEADING('Failed migrating database: %s. Error: %s' % (options['database'], e)))
 
     def run(self, *args, **options):
-        if six.PY3:
-            executor = ThreadPoolExecutor(max_workers=10)
-            for _, shard in settings.SHARDS.items():
-                executor.submit(self.migrate, *chain((shard,), args), **options)
-        else:
-            queue = deque()
-            for _, shard in settings.SHARDS.items():
-                queue.append(Thread(target=self.migrate, args=chain((shard,), args), kwargs=options))
-            workers = 0
-            while queue:
-                if workers < 10:
-                    t = queue.popleft()
-                    t.start()
+        for _, shard in settings.SHARDS.items():
+            self.migrate(shard, *args, **options)
 
     def handle(self, *args, **options):
         options['verbosity'] = 0
