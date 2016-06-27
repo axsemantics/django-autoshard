@@ -21,7 +21,11 @@ class ShardedQuerySet(models.QuerySet):
         return super(ShardedQuerySet, self).filter(*args, **kwargs)
 
     def count(self):
+        if self._db is not None:
+            return super().count()
         raise NotImplementedError('ShardedQuerySet does not implement count().')
 
     def all(self):
+        if self._db is not None:
+            return super().all()
         raise NotImplementedError('ShardedQuerySet does not implement all().')

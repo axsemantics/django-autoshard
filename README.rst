@@ -151,6 +151,10 @@ TODO
 Change Log
 ==========
 
+1.1.2 [2016-06-27]
+------------------
+- allow `all()` and `count()` if `using` is passed.
+
 1.1 [2016-05-21]
 ----------------
 - fixes management commands for python2 and python3 < 3.5
