@@ -43,9 +43,3 @@ class ShardRelatedModel(models.Model):
     def shard(self):
         for field in self._meta.fields:
             pass
-
-
-class User(ShardedModel, AbstractUser):
-    SHARD_KEY = 'email'
-
-    objects = UserManager()

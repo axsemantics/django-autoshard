@@ -10,7 +10,7 @@ class DjangoAutoshardSettings:
             user_settings = {}
 
         self.__settings = dict(
-            NODES = dict(),
+            NODES=dict(),
             EPOCH='2016-01-01',
             MAX_SHARDS=1 << 13,
         )

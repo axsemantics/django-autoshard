@@ -1,7 +1,5 @@
-from django.contrib.auth import get_user_model
 from django_autoshard.tests.base import TestBase
-
-User = get_user_model()
+from django_autoshard.tests.fakeapp.models import User
 
 
 class UserTests(TestBase):

@@ -8,10 +8,7 @@ A `Django <https://www.djangoproject.com/>`_ library that makes sharding easy, u
 
 .. image:: https://badge.fury.io/py/django-autoshard.svg
     :target: https://badge.fury.io/py/django-autoshard
-    
-.. image:: https://img.shields.io/pypi/dm/django-autoshard.svg
-    :target: https://img.shields.io/pypi/dm/django-autoshard.svg
-    
+
 .. image:: https://travis-ci.org/cipriantarta/django-autoshard.svg?branch=master
     :alt: Build Status
     :target: https://travis-ci.org/cipriantarta/django-autoshard
@@ -56,13 +53,14 @@ Installation
 
 .. code-block:: python
 
+    from django.contrib.auth.models import AbstractUser
     from django_autoshard.models import ShardedModel, ShardRelatedModel
     from django_autoshard.managers import ShardedManager
 
 
     class User(ShardedModel, AbstractUser):
         SHARD_KEY = 'email'
-        objects = UserManager()
+        objects = ShardedManager()
 
 
     class Book(ShardRelatedModel):
@@ -71,32 +69,26 @@ Installation
 3. Use this model as the default auth model in your :python:`settings.py` file.
     :python:`AUTH_USER_MODEL='<path.to.your.model>.User'`
 
-4. Make sure you have set up the :python:`settings.DATABASES` correctly(any Django supported database back-end will work)
-    and add a range of logical shards to each of your configured database node that you want to use for sharding.
+4. Make sure you have set up the :python:`settings.DATABASES` correctly(any Django supported database back-end will work) and add the following to your settings file. The range() will create the logical shards, so in the example below, range(10) will create 10 logical shards on the NODE "192.168.0.100" using the default database name, user and password:
         .. code-block:: python
 
-            DATABASES = {
-                'default': {
-                    'ENGINE': 'django.db.backends.mysql',
-                    'HOST': 'db_a',
-                    'NAME': 'my_database',
-                    'USER': 'root',
-                    'PASSWORD': 'secretpass',
-                    'RANGE': range(10),
-                },
-                'DB_B': {
-                    'ENGINE': 'django.db.backends.mysql',
-                    'HOST': 'db_b',
-                    'NAME': 'my_database',
-                    'USER': 'root',
-                    'PASSWORD': 'secretpass',
-                    'RANGE': range(10, 20),
-                },
+            DJANGO_AUTOSHARD = {
+                "NODES": [
+                    {
+                        "HOST": "192.168.0.100",  # DB MACHINE 1
+                        "RANGE": range(10)
+                    },
+                    {
+                        "HOST": "192.168.0.101", # DB MACHINE 2
+                        "RANGE": range(10, 20)
+                    }
+                    # and so on ...
+                ]
             }
 
-5. Run :python:`python manage.py migrate`
+5. Run :python:`python manage.py create_shards`
 
-6. Run :python:`python manage.py create_shards`
+6. Run :python:`python manage.py migrate`
 
 7. Run :python:`python manage.py migrate_shards`
 
@@ -107,7 +99,7 @@ Commands
 Management Commands that come with this library:
 
     1. create_shards:
-        - this command will create all the logical shards(new databases) on all of the configured databases(nodes) in :python:`settings.DATABASES`
+        - this command will create all the logical shards(new databases) on all of the configured shard nodes in :python:`settings.DJANGO_AUTOSHARD`
 
     2. migrate_shards:
         - this command will migrate all your application's models to all of the logical shards created with "create_shards"
@@ -124,6 +116,9 @@ The settings are isolated into a single dict in your settings.py file like so:
     DJANGO_AUTOSHARD = {
         'EPOCH': '2016-01-01',
         'MAX_SHARDS': 1000,
+        'NODES': {
+            ...
+        }
     }
 
 :python:`EPOCH` - defaults to :python:`'2016-01-01'`. Must be in :python:`'%Y-%m-%d'` format.
@@ -146,10 +141,16 @@ TODO
 - Create shard migration script
 - Create a benchmarking script
 - Add more tests
-- Test against Postgresql and Oracle
 
 Change Log
 ==========
+
+1.2.0 [2016-06-30]
+------------------
+- Changed the way shards are built, using `settings.DJANGO_AUTOSHARD['NODES']`. See INSTALLATION
+- added support for Django 1.7
+- removed support for python 3.3, because it only worked with Django 1.8
+- django_autoshard User model is only created when testing now.
 
 1.1.2 [2016-06-27]
 ------------------

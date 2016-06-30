@@ -4,7 +4,6 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': 'autoshard',
-        'RANGE': range(2),
     }
 }
 MIDDLEWARE_CLASSES = [
@@ -25,7 +24,16 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'django_autoshard'
+    'django_autoshard',
+    'django_autoshard.tests.fakeapp'
 ]
-AUTH_USER_MODEL = 'django_autoshard.User'
+AUTH_USER_MODEL = 'fakeapp.User'
 TEST_RUNNER = 'django_autoshard.tests.runner.TestRunner'
+DJANGO_AUTOSHARD = {
+    "NODES": [
+        {
+            "HOST": "",
+            "RANGE": range(2)
+        }
+    ]
+}
