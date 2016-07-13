@@ -1,7 +1,7 @@
 from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
-from django.db import connection
+from django.db import connections
 from django.db.utils import OperationalError, ProgrammingError
 from django_autoshard import models
 
@@ -14,23 +14,31 @@ class Command(BaseCommand):
                             help='Show a list of all the constraints that will be dropped')
 
     def handle(self, *args, **options):
-        with connection.cursor() as cursor:
-            for model in apps.get_models():
-                if issubclass(model, models.ShardedModel) or issubclass(model, models.ShardRelatedModel):
-                    continue
-                self.run(cursor, model, **options)
+        for connection in connections.all():
+            with connection.cursor() as cursor:
+                for model in apps.get_models():
+                    if issubclass(model, models.ShardedModel):
+                        continue
+                    self.run(connection, cursor, model, **options)
 
-    def run(self, cursor, model, **options):
+    def run(self, connection, cursor, model, **options):
         try:
             constraints = dict()
             for key, val in cursor.db.introspection.get_constraints(cursor, model._meta.db_table).items():
-                if val['foreign_key'] is not None and val['foreign_key'][0] == get_user_model()._meta.db_table:
-                    constraints[key] = val
+                if issubclass(model, models.ShardRelatedModel):
+                    if val['foreign_key'] is not None and val['foreign_key'][0] == get_user_model()._meta.db_table:
+                        continue
+                    elif val['foreign_key'] is not None:
+                        constraints[key] = val
+
+                else:
+                    if val['foreign_key'] is not None and val['foreign_key'][0] == get_user_model()._meta.db_table:
+                        constraints[key] = val
         except ProgrammingError:
             return
 
         if len(constraints) == 0:
-            f = self.style.MIGRATE_HEADING('No constraints defined for {}.'.format(str(model)))
+            f = self.style.MIGRATE_HEADING('[{}] No constraints defined for {}.'.format(connection.alias, str(model)))
             self.stdout.write(f)
             return
 
@@ -47,12 +55,12 @@ class Command(BaseCommand):
                 continue
 
             try:
-                f = self.style.MIGRATE_HEADING('Executing {}'.format(sql))
+                f = self.style.MIGRATE_HEADING('[{}] Executing {}'.format(connection.alias, sql))
                 self.stdout.write(f)
 
                 cursor.execute(sql)
-                f = self.style.MIGRATE_HEADING('Done.\n')
+                f = self.style.MIGRATE_HEADING('[{}] Done.\n'.format(connection.alias))
                 self.stdout.write(f)
             except OperationalError as e:
-                f = self.style.MIGRATE_HEADING('Failed [{}].\n'.format(str(e)))
+                f = self.style.MIGRATE_HEADING('[{}] Failed: {}.\n'.format(connection.alias, str(e)))
                 self.stdout.write(f)
