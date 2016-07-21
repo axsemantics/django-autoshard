@@ -7,7 +7,7 @@ from django_autoshard import models
 
 
 class Command(BaseCommand):
-    help = 'Create shards databases'
+    help = 'Drop certain constraints from databases'
 
     def add_arguments(self, parser):
         parser.add_argument('--list', '-l', action='store_true', default=False,
